@@ -2,15 +2,27 @@
 
 import os
 import re
+import sys
 import asyncio
 from pathlib import Path
 from datetime import datetime
 from mcp.server.fastmcp import FastMCP
 from mcp.types import TextContent
 
+def get_logs_directory():
+    """Get logs directory from command line arg, env var, or default"""
+    if len(sys.argv) > 1:
+        custom_logs_dir = Path(sys.argv[1])
+        if custom_logs_dir.exists():
+            return custom_logs_dir
+        else:
+            print(f"Warning: Directory {custom_logs_dir} does not exist, using default")
+    
+    return Path(os.getenv("LOGS_DIR", Path(__file__).parent / "logs"))
+
 # Initialize server
 server = FastMCP("log-server")
-LOGS_DIR = Path(__file__).parent / "logs"
+LOGS_DIR = get_logs_directory()
 
 @server.tool()
 async def list_files():
@@ -208,7 +220,17 @@ async def log_summary(filename: str):
     return [TextContent(type="text", text=result)]
 
 if __name__ == "__main__":
-    print("Starting enhanced MCP log server...")
-    print("Tools available: list_files, read_file, search_logs, filter_by_level, search_all_logs, log_summary")
-    print("Waiting for connections...")
+    # Print startup banner
+    print("\n🚀 Starting MCP log server...")
+    print("\n🛠️  Tools available:")
+    print("    list_files, read_file, search_logs, filter_by_level, search_all_logs, log_summary")
+    
+    print(f"\n📂 Monitoring logs in: {LOGS_DIR}")
+    print("🌐 Running on: http://localhost:8000")
+    print("⚠️  Press Ctrl+C to stop the server.")
+    
+    print("\n💻 Use the MCP client (Claude Desktop) to connect and interact with the server.")
+    print("📖 See README.md for how to set up Claude Desktop to use this server.")
+    
+    print("\n⏳ Waiting for connections...\n")
     asyncio.run(server.run())

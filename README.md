@@ -21,7 +21,7 @@ A Model Context Protocol (MCP) server for log file management and analysis with 
    pip install mcp>=1.9.3 watchdog>=3.0.0
    ```
 
-2. **Create logs directory:**
+2. **Create logs directory (optional):**
    ```bash
    mkdir logs
    # Add some .log files to test
@@ -30,8 +30,14 @@ A Model Context Protocol (MCP) server for log file management and analysis with 
 
 3. **Run the server:**
    ```bash
-   # Production
+   # Use default ./logs directory
    python mcp_server.py
+   
+   # Use custom logs directory (command line)
+   python mcp_server.py /path/to/your/logs
+   
+   # Use custom logs directory (environment variable)
+   LOGS_DIR="/path/to/your/logs" python mcp_server.py
    
    # Development (with hot reload)
    python dev_server.py
@@ -90,6 +96,7 @@ Generates comprehensive analytics and statistics for a log file.
 
 Add to your `claude_desktop_config.json`:
 
+**Option 1: Default logs directory**
 ```json
 {
   "mcpServers": {
@@ -102,18 +109,53 @@ Add to your `claude_desktop_config.json`:
 }
 ```
 
-**Example (replace with your actual paths):**
+**Option 2: Custom logs directory (command line)**
 ```json
 {
   "mcpServers": {
     "log-server": {
-      "command": "/Users/username/projects/logscribe-mcp/venv/bin/python",
-      "args": ["/Users/username/projects/logscribe-mcp/mcp_server.py"],
-      "cwd": "/Users/username/projects/logscribe-mcp"
+      "command": "/full/path/to/your/venv/bin/python",
+      "args": ["/full/path/to/your/mcp_server.py", "/path/to/your/logs"],
+      "cwd": "/full/path/to/your/project"
     }
   }
 }
 ```
+
+**Option 3: Custom logs directory (environment variable)**
+```json
+{
+  "mcpServers": {
+    "log-server": {
+      "command": "/full/path/to/your/venv/bin/python",
+      "args": ["/full/path/to/your/mcp_server.py"],
+      "cwd": "/full/path/to/your/project",
+      "env": {
+        "LOGS_DIR": "/path/to/your/logs"
+      }
+    }
+  }
+}
+```
+
+## Configuration
+
+### Logs Directory
+
+The server supports three ways to specify where your log files are located:
+
+1. **Default**: Uses `./logs` directory in the project folder
+2. **Command Line**: Pass directory path as first argument
+   ```bash
+   python mcp_server.py /var/log/myapp
+   ```
+3. **Environment Variable**: Set `LOGS_DIR` environment variable
+   ```bash
+   export LOGS_DIR="/var/log/myapp"
+   python mcp_server.py
+   ```
+
+Priority order: Command Line > Environment Variable > Default
 
 ## Example Usage
 
