@@ -1,0 +1,23 @@
+{
+    "schema_version": "1.0",
+    "tools": [
+      {
+        "name": "list_files",
+        "description": "Returns a list of available log files in the system.",
+        "input_schema": {
+          "type": "object",
+          "properties": {}
+        },
+        "output_schema": {
+          "type": "object",
+          "properties": {
+            "files": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        }
+      }
+    ]
+  }
+  
