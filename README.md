@@ -9,12 +9,13 @@ A Model Context Protocol (MCP) server for log file management and analysis with 
 - 🔍 **Search Logs** - Search for patterns within log files using regex
 - ✅ **Error Handling** - Graceful handling of missing files and edge cases
 - 🎨 **Rich Output** - Formatted output with emojis and visual separators
+- 🔧 **Hot Reload** - Auto-restart on file changes during development
 
 ## Quick Start
 
 1. **Install dependencies:**
    ```bash
-   pip install mcp>=1.9.3
+   pip install mcp>=1.9.3 watchdog>=3.0.0
    ```
 
 2. **Create logs directory:**
@@ -26,7 +27,11 @@ A Model Context Protocol (MCP) server for log file management and analysis with 
 
 3. **Run the server:**
    ```bash
+   # Production
    python mcp_server.py
+   
+   # Development (with hot reload)
+   python dev_server.py
    ```
 
 ## Available Tools
@@ -72,9 +77,23 @@ Add to your `claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "logscribe": {
-      "command": "python",
-      "args": ["/full/path/to/your/mcp_server.py"]
+    "log-server": {
+      "command": "/full/path/to/your/venv/bin/python",
+      "args": ["/full/path/to/your/mcp_server.py"],
+      "cwd": "/full/path/to/your/project"
+    }
+  }
+}
+```
+
+**Example (replace with your actual paths):**
+```json
+{
+  "mcpServers": {
+    "log-server": {
+      "command": "/Users/username/projects/logscribe-mcp/venv/bin/python",
+      "args": ["/Users/username/projects/logscribe-mcp/mcp_server.py"],
+      "cwd": "/Users/username/projects/logscribe-mcp"
     }
   }
 }
@@ -99,3 +118,13 @@ The server gracefully handles:
 
 - Python 3.8+
 - mcp>=1.9.3
+- watchdog>=3.0.0 (for development hot reload)
+
+## Development
+
+For development with automatic restart on file changes:
+```bash
+python dev_server.py
+```
+
+The development server will automatically restart when you modify any `.py` files, making it easier to test changes without manually restarting.
