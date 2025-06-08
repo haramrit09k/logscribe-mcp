@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import re
 import asyncio
 from pathlib import Path
 from datetime import datetime
@@ -53,8 +54,39 @@ async def read_file(filename: str, lines: int = 10):
     
     return [TextContent(type="text", text=result)]
 
+@server.tool()
+async def search_logs(filename: str, pattern: str, lines: int = 20):
+    """Search for pattern in log file and return matching lines"""
+    file_path = LOGS_DIR / filename
+    
+    if not file_path.exists():
+        return [TextContent(type="text", text=f"❌ File '{filename}' not found")]
+    
+    with open(file_path, 'r') as f:
+        all_lines = f.readlines()
+    
+    matches = []
+    for i, line in enumerate(all_lines, 1):
+        if re.search(pattern, line, re.IGNORECASE):
+            matches.append((i, line.rstrip()))
+    
+    if not matches:
+        return [TextContent(type="text", text=f"🔍 No matches found for '{pattern}' in {filename}")]
+    
+    # Limit results
+    if len(matches) > lines:
+        matches = matches[-lines:]
+    
+    result = f"🔍 Search results for '{pattern}' in {filename}:\n"
+    result += "─" * 50 + "\n"
+    
+    for line_num, content in matches:
+        result += f"{line_num:4d} | {content}\n"
+    
+    return [TextContent(type="text", text=result)]
+
 if __name__ == "__main__":
     print("Starting enhanced MCP log server...")
-    print("Tools available: list_files, read_file")
+    print("Tools available: list_files, read_file, search_logs")
     print("Waiting for connections...")
     asyncio.run(server.run())
