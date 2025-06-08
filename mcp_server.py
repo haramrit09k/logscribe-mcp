@@ -85,8 +85,41 @@ async def search_logs(filename: str, pattern: str, lines: int = 20):
     
     return [TextContent(type="text", text=result)]
 
+@server.tool()
+async def filter_by_level(filename: str, level: str = "ERROR"):
+    """Filter log entries by level (ERROR, WARN, INFO, DEBUG, CRITICAL)"""
+    file_path = LOGS_DIR / filename
+    
+    if not file_path.exists():
+        return [TextContent(type="text", text=f"❌ File '{filename}' not found")]
+    
+    level = level.upper()
+    valid_levels = ["ERROR", "WARN", "INFO", "DEBUG", "CRITICAL"]
+    
+    if level not in valid_levels:
+        return [TextContent(type="text", text=f"❌ Invalid level. Use: {', '.join(valid_levels)}")]
+    
+    with open(file_path, 'r') as f:
+        all_lines = f.readlines()
+    
+    matches = []
+    for i, line in enumerate(all_lines, 1):
+        if f'[{level}]' in line:
+            matches.append((i, line.rstrip()))
+    
+    if not matches:
+        return [TextContent(type="text", text=f"📊 No {level} entries found in {filename}")]
+    
+    result = f"📊 {level} entries in {filename} ({len(matches)} found):\n"
+    result += "─" * 50 + "\n"
+    
+    for line_num, content in matches:
+        result += f"{line_num:4d} | {content}\n"
+    
+    return [TextContent(type="text", text=result)]
+
 if __name__ == "__main__":
     print("Starting enhanced MCP log server...")
-    print("Tools available: list_files, read_file, search_logs")
+    print("Tools available: list_files, read_file, search_logs, filter_by_level")
     print("Waiting for connections...")
     asyncio.run(server.run())

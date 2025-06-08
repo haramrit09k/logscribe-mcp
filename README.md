@@ -7,6 +7,7 @@ A Model Context Protocol (MCP) server for log file management and analysis with 
 - 📁 **List Log Files** - View all .log files with size metadata
 - 📖 **Read Log Files** - Read the last N lines with line numbers and formatting
 - 🔍 **Search Logs** - Search for patterns within log files using regex
+- 🏷️ **Filter by Log Level** - Filter entries by ERROR, WARN, INFO, DEBUG, CRITICAL
 - ✅ **Error Handling** - Graceful handling of missing files and edge cases
 - 🎨 **Rich Output** - Formatted output with emojis and visual separators
 - 🔧 **Hot Reload** - Auto-restart on file changes during development
@@ -70,6 +71,13 @@ Searches for a pattern within a specific log file using case-insensitive regex.
 - `pattern`: Search pattern (supports regex)
 - `lines`: Maximum number of matching lines to return (default: 20)
 
+### `filter_by_level(filename: str, level: str = "ERROR")`
+Filters log entries by their log level.
+
+**Parameters:**
+- `filename`: Name of the log file to filter
+- `level`: Log level to filter by (ERROR, WARN, INFO, DEBUG, CRITICAL)
+
 ## Claude Desktop Integration
 
 Add to your `claude_desktop_config.json`:
@@ -106,6 +114,7 @@ Ask Claude:
 - "Show me the last 20 lines from app.log"
 - "Read the last 5 lines from error.log"
 - "Search for 'ERROR' in app.log"
+- "Show me all ERROR entries in app.log"
 
 ## Error Handling
 
