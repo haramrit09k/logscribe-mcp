@@ -21,7 +21,8 @@ async def list_files():
         if file_path.is_file():
             stat = file_path.stat()
             size_kb = round(stat.st_size / 1024, 2)
-            log_files.append(f"{file_path.name} ({size_kb} KB)")
+            mod_time = datetime.fromtimestamp(stat.st_mtime).strftime("%Y-%m-%d %H:%M")
+            log_files.append(f"{file_path.name} ({size_kb} KB, modified: {mod_time})")
     
     if not log_files:
         return [TextContent(type="text", text="No .log files found")]
@@ -118,8 +119,96 @@ async def filter_by_level(filename: str, level: str = "ERROR"):
     
     return [TextContent(type="text", text=result)]
 
+@server.tool()
+async def search_all_logs(pattern: str, max_results: int = 50):
+    """Search for pattern across all log files"""
+    log_files = list(LOGS_DIR.glob("*.log"))
+    
+    if not log_files:
+        return [TextContent(type="text", text="No .log files found")]
+    
+    all_matches = []
+    
+    for file_path in log_files:
+        with open(file_path, 'r') as f:
+            lines = f.readlines()
+        
+        for i, line in enumerate(lines, 1):
+            if re.search(pattern, line, re.IGNORECASE):
+                all_matches.append((file_path.name, i, line.rstrip()))
+    
+    if not all_matches:
+        return [TextContent(type="text", text=f"🔍 No matches found for '{pattern}' across all log files")]
+    
+    # Limit results
+    if len(all_matches) > max_results:
+        all_matches = all_matches[-max_results:]
+    
+    result = f"🔍 Search results for '{pattern}' across all logs:\n"
+    result += "─" * 50 + "\n"
+    
+    current_file = ""
+    for filename, line_num, content in all_matches:
+        if filename != current_file:
+            result += f"\n📄 {filename}:\n"
+            current_file = filename
+        
+        result += f"{line_num:4d} | {content}\n"
+    
+    return [TextContent(type="text", text=result)]
+
+@server.tool()
+async def log_summary(filename: str):
+    """Generate a summary of log file contents by level and services"""
+    file_path = LOGS_DIR / filename
+    
+    if not file_path.exists():
+        return [TextContent(type="text", text=f"❌ File '{filename}' not found")]
+    
+    with open(file_path, 'r') as f:
+        lines = f.readlines()
+    
+    if not lines:
+        return [TextContent(type="text", text=f"📄 {filename} is empty")]
+    
+    # Count by level
+    levels = {"ERROR": 0, "WARN": 0, "INFO": 0, "DEBUG": 0, "CRITICAL": 0}
+    services = {}
+    
+    for line in lines:
+        # Count log levels
+        for level in levels:
+            if f'[{level}]' in line:
+                levels[level] += 1
+                break
+        
+        # Extract service names (text in parentheses)
+        service_match = re.search(r'\(([^)]+)\)', line)
+        if service_match:
+            service = service_match.group(1)
+            services[service] = services.get(service, 0) + 1
+    
+    # Build summary
+    result = f"📊 Summary for {filename} ({len(lines)} total lines):\n"
+    result += "─" * 50 + "\n"
+    
+    # Log levels
+    result += "📈 Log Levels:\n"
+    for level, count in levels.items():
+        if count > 0:
+            result += f"  {level}: {count}\n"
+    
+    # Top services
+    if services:
+        result += "\n🔧 Top Services:\n"
+        sorted_services = sorted(services.items(), key=lambda x: x[1], reverse=True)[:5]
+        for service, count in sorted_services:
+            result += f"  {service}: {count} entries\n"
+    
+    return [TextContent(type="text", text=result)]
+
 if __name__ == "__main__":
     print("Starting enhanced MCP log server...")
-    print("Tools available: list_files, read_file, search_logs, filter_by_level")
+    print("Tools available: list_files, read_file, search_logs, filter_by_level, search_all_logs, log_summary")
     print("Waiting for connections...")
     asyncio.run(server.run())
