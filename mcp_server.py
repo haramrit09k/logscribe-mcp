@@ -9,6 +9,18 @@ from datetime import datetime
 from mcp.server.fastmcp import FastMCP
 from mcp.types import TextContent
 
+def _resolve_log_path(filename: str) -> Path | None:
+    """Resolve a filename within LOGS_DIR and ensure it stays inside it."""
+    base = LOGS_DIR.resolve()
+    candidate = (base / filename).resolve()
+    try:
+        candidate.relative_to(base)
+    except ValueError:
+        return None
+    if not candidate.is_file():
+        return None
+    return candidate
+
 def get_logs_directory():
     """Get logs directory from command line arg, env var, or default"""
     if len(sys.argv) > 1:
@@ -44,9 +56,9 @@ async def list_files():
 @server.tool()
 async def read_file(filename: str, lines: int = 10):
     """Read last N lines from a log file with formatted output"""
-    file_path = LOGS_DIR / filename
-    
-    if not file_path.exists():
+    file_path = _resolve_log_path(filename)
+
+    if not file_path:
         return [TextContent(type="text", text=f"❌ File '{filename}' not found")]
     
     with open(file_path, 'r') as f:
@@ -70,9 +82,9 @@ async def read_file(filename: str, lines: int = 10):
 @server.tool()
 async def search_logs(filename: str, pattern: str, lines: int = 20):
     """Search for pattern in log file and return matching lines"""
-    file_path = LOGS_DIR / filename
-    
-    if not file_path.exists():
+    file_path = _resolve_log_path(filename)
+
+    if not file_path:
         return [TextContent(type="text", text=f"❌ File '{filename}' not found")]
     
     with open(file_path, 'r') as f:
@@ -101,9 +113,9 @@ async def search_logs(filename: str, pattern: str, lines: int = 20):
 @server.tool()
 async def filter_by_level(filename: str, level: str = "ERROR"):
     """Filter log entries by level (ERROR, WARN, INFO, DEBUG, CRITICAL)"""
-    file_path = LOGS_DIR / filename
-    
-    if not file_path.exists():
+    file_path = _resolve_log_path(filename)
+
+    if not file_path:
         return [TextContent(type="text", text=f"❌ File '{filename}' not found")]
     
     level = level.upper()
@@ -172,9 +184,9 @@ async def search_all_logs(pattern: str, max_results: int = 50):
 @server.tool()
 async def log_summary(filename: str):
     """Generate a summary of log file contents by level and services"""
-    file_path = LOGS_DIR / filename
-    
-    if not file_path.exists():
+    file_path = _resolve_log_path(filename)
+
+    if not file_path:
         return [TextContent(type="text", text=f"❌ File '{filename}' not found")]
     
     with open(file_path, 'r') as f:
