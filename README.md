@@ -180,6 +180,24 @@ The server gracefully handles:
 - Python 3.8+
 - mcp>=1.9.3
 - watchdog>=3.0.0 (for development hot reload)
+- pytest>=7.0.0 (for running tests)
+
+## Testing
+
+Run the included tests to verify everything works:
+
+```bash
+# Simple test runner
+python tests/test_basic.py
+
+# Or using pytest (install first: pip install pytest)
+pytest tests/ -v
+```
+
+Tests cover:
+- Server initialization and configuration
+- Log directory selection logic (env vars, command line args)
+- Basic functionality verification
 
 ## Development
 
