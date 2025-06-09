@@ -29,10 +29,13 @@ A Model Context Protocol (MCP) server for log file management and analysis with 
    ```
    (You could also use sample logs in the logs folder to get started.)
 
-3. **Run the server:**
+3. **Run the server (SSE via uvicorn):**
    ```bash
    # Use default ./logs directory
    python mcp_server.py
+
+   # The server uses uvicorn and exposes an SSE endpoint at
+   # http://localhost:8000/log-server
    
    # Use custom logs directory (command line)
    python mcp_server.py /path/to/your/logs

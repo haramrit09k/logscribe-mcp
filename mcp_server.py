@@ -233,4 +233,4 @@ if __name__ == "__main__":
     print("📖 See README.md for how to set up Claude Desktop to use this server.")
     
     print("\n⏳ Waiting for connections...\n")
-    asyncio.run(server.run())
+    server.run(transport="sse")
