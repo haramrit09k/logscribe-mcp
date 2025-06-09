@@ -18,7 +18,7 @@ A Model Context Protocol (MCP) server for log file management and analysis with 
 
 1. **Install dependencies:**
    ```bash
-   pip install mcp>=1.9.3 watchdog>=3.0.0
+   pip install -r requirements.txt
    ```
 
 2. **Create logs directory (optional):**
@@ -27,6 +27,7 @@ A Model Context Protocol (MCP) server for log file management and analysis with 
    # Add some .log files to test
    echo "2024-01-01 INFO Application started" > logs/app.log
    ```
+   (You could also use sample logs in the logs folder to get started.)
 
 3. **Run the server:**
    ```bash
@@ -180,7 +181,7 @@ The server gracefully handles:
 - Python 3.8+
 - mcp>=1.9.3
 - watchdog>=3.0.0 (for development hot reload)
-- pytest>=7.0.0 (for running tests)
+- pytest>=8.4.0 (for running tests)
 
 ## Testing
 
